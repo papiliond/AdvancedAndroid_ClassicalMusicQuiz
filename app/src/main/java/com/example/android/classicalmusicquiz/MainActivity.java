@@ -16,7 +16,10 @@
 
 package com.example.android.classicalmusicquiz;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView highScoreTextView = (TextView) findViewById(R.id.highscoreText);
+        TextView highScoreTextView = findViewById(R.id.highscoreText);
 
         // Get the high and max score.
         int highScore = QuizUtils.getHighScore(this);
@@ -45,8 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
         // If the game is over, show the game finished UI.
         if(getIntent().hasExtra(GAME_FINISHED)){
-            TextView gameFinishedTextView = (TextView) findViewById(R.id.gameResult);
-            TextView yourScoreTextView = (TextView) findViewById(R.id.resultScore);
+            TextView gameFinishedTextView = findViewById(R.id.gameResult);
+            TextView yourScoreTextView = findViewById(R.id.resultScore);
 
             Integer yourScore = QuizUtils.getCurrentScore(this);
             String yourScoreText = getString(R.string.score_result, yourScore, maxScore);
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             gameFinishedTextView.setVisibility(View.VISIBLE);
             yourScoreTextView.setVisibility(View.VISIBLE);
         }
+
+        createNotificationChannel();
     }
 
 
@@ -65,5 +70,23 @@ public class MainActivity extends AppCompatActivity {
     public void newGame(View view) {
         Intent quizIntent = new Intent(this, QuizActivity.class);
         startActivity(quizIntent);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = getString(R.string.notification_channel_id);
+            CharSequence channelName = getString(R.string.notification_channel_name);
+            String description = "Notificaton channel for Classical Music Quiz.";
+
+            NotificationChannel notificationChannel =
+                    new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription(description);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
+        }
     }
 }
